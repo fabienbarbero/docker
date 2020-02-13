@@ -1,0 +1,56 @@
+version: "3"
+
+services:
+
+  elasticsearch:
+    image: elasticsearch:7.4.0
+    container_name: elk_elasticsearch
+    networks:
+      - elk
+    volumes:
+      - ${HOME}/.elk/es-data:/usr/share/elasticsearch/data
+    environment:
+      - "ES_JAVA_OPTS=-Xmx256m -Xms256m"
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  logstash:
+    image: logstash:7.4.0
+    container_name: elk_logstash
+    depends_on:
+      - elasticsearch
+    networks:
+      - elk
+    volumes:
+      - ./logstash:/usr/share/logstash/pipeline
+    ports:
+      - "4560:4560"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+
+  apm:
+    image: store/elastic/apm-server:7.4.0
+    container_name: elk_apm
+    networks:
+      - elk
+    volumes:
+      - ./apm/apm-server.docker.yml:/usr/share/apm-server/apm-server.yml
+    ports:
+      - "8200:8200"
+
+  kibana:
+    image: kibana:7.4.0
+    container_name: elk_kibana
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    networks:
+      - elk
+
+networks:
+  elk:
+    driver: bridge

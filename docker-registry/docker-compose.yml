@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+
+  registry:
+    image: registry:2.7
+    networks:
+      - registry-net
+    ports:
+      - "5000:5000"
+    volumes:
+      - ${HOME}/.docker-registry/data:/var/lib/registry
+
+  ui:
+    image: jc21/registry-ui:2.0.2
+    networks:
+      - registry-net
+    depends_on:
+      - registry
+    ports:
+      - "3000:80"
+    environment:
+      REGISTRY_HOST: "registry:5000"
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      REGISTRY_DOMAIN: "localhost:5000"
+
+networks:
+  registry-net:
+    driver: bridge
