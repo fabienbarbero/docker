@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab-ce
+    restart: always
+    hostname: 'localhost'
+    ports:
+      - 8080:80
+    volumes:
+      #- ${HOME}/.gitlab/config:/etc/gitlab
+      - ${HOME}/.gitlab/logs:/var/log/gitlab
+      - ${HOME}/.gitlab/data:/var/opt/gitlab
+
+  runner:
+    image: gitlab/gitlab-runner
+    container_name: gitlab-runner
+    restart: always
+    volumes:
+      #- ${HOME}/.gitlab/runner/config:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  registry:
+    image: registry:2.7
+    container_name: gitlab-registry
+    restart: always
+    volumes:
+      - ${HOME}/.docker-registry/data:/var/lib/registry
